@@ -2,6 +2,6 @@
 
 ## About
 
-A terminal version of the game [2048 by Gabriele Cirulli](https://github.com/gabrielecirulli/2048) made in Python. GUI coming soon.
+A Python clone of the game [2048 by Gabriele Cirulli](https://github.com/gabrielecirulli/2048) made with Tkinter.
 
-![Screenshot](images/screenshot.png)
+![Screenshot](images/2048_GUI.png)
