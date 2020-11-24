@@ -11,7 +11,11 @@ TITLE_FONT = ("Clear Sans", 70, "bold")
 SCORE_BACKROUND_COLOR = "#BBADA0"
 SCORE_TEXT_COLOR = "#F9F6F2"
 SCORE_LABEL_FONT = ("Clear Sans", 15, "bold")
-SCORE_FONT = font=("Clear Sans", 25, "bold")
+SCORE_FONT = ("Clear Sans", 25, "bold")
+
+BUTTON_BACKGROUND_COLOR = "#BBADA0"
+BUTTON_TEXT_COLOR = "#F9F6F2"
+BUTTON_FONT = ("Clear Sans", 20, "bold")
 
 BOARD_BACKGROUND_COLOR = "#BBADA0"
 EMPTY_TILE_COLOR = "#D6CDC4"
@@ -28,31 +32,45 @@ class Window(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self.title("2048")
-        self.geometry("410x500")
+        self.geometry("430x570")
         self.resizable(0,0)
         self.configure(bg=WINDOW_BACKGROUND_COLOR)
 
-        self.name = tk.Label(text="2048", fg=TITLE_TEXT_COLOR, bg=WINDOW_BACKGROUND_COLOR, font=TITLE_FONT)
+        self.name = tk.Label(text="2048", fg=TITLE_TEXT_COLOR,
+                             bg=WINDOW_BACKGROUND_COLOR, font=TITLE_FONT)
         self.name.grid(row=0, column=0)
 
         self.game = Game()
         self.old_game = self.game.copy()
 
         self.score_frame = tk.Frame(bg=SCORE_BACKROUND_COLOR)
-        self.score_frame.grid(row=0, column=1)
+        self.score_frame.grid(row=0, column=1, padx=(0,25))
         self.score_label = tk.Label(self.score_frame, text="SCORE",
-                                    fg=SCORE_TEXT_COLOR, bg=SCORE_BACKROUND_COLOR,
+                                    fg=SCORE_TEXT_COLOR,
+                                    bg=SCORE_BACKROUND_COLOR,
                                     font=SCORE_LABEL_FONT)
         self.score_label.grid()
         self.score_text = tk.Label(self.score_frame, text=self.game.score,
-                                    fg=SCORE_TEXT_COLOR, bg=SCORE_BACKROUND_COLOR, width=7, 
-                                    font=SCORE_FONT)
+                                   fg=SCORE_TEXT_COLOR,
+                                   bg=SCORE_BACKROUND_COLOR,
+                                   width=7,font=SCORE_FONT)
         self.score_text.grid()
 
-        self.tiles = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+        self.undo_button = tk.Label(text="UNDO", fg=BUTTON_TEXT_COLOR,
+                                    bg=BUTTON_BACKGROUND_COLOR, width=9,
+                                    font=BUTTON_FONT, pady=7)
+        self.undo_button.grid(row=1, column=0, pady=3)
+        self.undo_button.bind("<Button-1>", self.undo)
 
-        self.board_frame = tk.Frame(bg=BOARD_BACKGROUND_COLOR)
-        self.board_frame.grid(row=1, columnspan=2, padx=9, pady=9)
+        self.restart_button = tk.Label(text="RESTART", fg=BUTTON_TEXT_COLOR,
+                                       bg=BUTTON_BACKGROUND_COLOR, width=9,
+                                       font=BUTTON_FONT, pady=7)
+        self.restart_button.grid(row=1, column=1, padx=(0,25), pady=3)
+        self.restart_button.bind("<Button-1>", self.restart)
+
+        self.tiles = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+        self.board_frame = tk.Frame(bg=BOARD_BACKGROUND_COLOR, padx=4, pady=4)
+        self.board_frame.grid(row=2, columnspan=2, padx=15, pady=25)
         self.create_board()
 
         self.bind("<Key>", self.move)
@@ -66,13 +84,13 @@ class Window(tk.Tk):
     
     def create_tile(self, x, y, value):
         if value == 0:
-            tile = tk.Label(self.board_frame, bg=EMPTY_TILE_COLOR, width=4, 
+            tile = tk.Label(self.board_frame, bg=EMPTY_TILE_COLOR, width=4,
                             height=2, font=TILE_FONT)
         else:
             tile = tk.Label(self.board_frame, text=str(value), 
                             fg=TILE_TEXT_COLORS[value], 
-                            bg=TILE_COLORS[value], width=4, height=2,
-                            font=TILE_FONT)
+                            bg=TILE_COLORS[value], width=4,
+                            height=2, font=TILE_FONT)
         tile.grid(row=x, column=y, padx=4, pady=4, ipadx=2, ipady=6)
         self.tiles[x][y] = tile
     
@@ -104,20 +122,20 @@ class Window(tk.Tk):
             if self.game.board != old_board:
                 self.game.add_tile()
                 self.old_game = temp_game
-        elif key == 'u':
-            self.undo()
-        elif key == 'r':
-            self.restart()
         self.update_board()
         self.update_score()
     
-    def undo(self):
+    def undo(self, event):
         self.game = self.old_game
+        self.update_board()
+        self.update_score()
 
-    def restart(self):
+    def restart(self, event):
         del self.game
         self.game = Game()
         self.old_game = self.old_game.copy()
+        self.update_board()
+        self.update_score()
 
 
 class Game:
@@ -186,7 +204,8 @@ class Game:
     
     def get_move(self):
         while True:
-            key = input("Enter 'w' to move up, 'a' to move left, 's' to move down, or 'd' to move right: ")
+            key = input("Enter 'w' to move up, 'a' to move left, "
+                        "'s' to move down, or 'd' to move right: ")
             key = key.lower()
             if key in ['w', 'a', 's', 'd']:
                 return key
