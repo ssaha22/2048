@@ -36,6 +36,7 @@ class Window(tk.Tk):
         self.name.grid(row=0, column=0)
 
         self.game = Game()
+        self.old_game = self.game.copy()
 
         self.score_frame = tk.Frame(bg=SCORE_BACKROUND_COLOR)
         self.score_frame.grid(row=0, column=1)
@@ -92,19 +93,31 @@ class Window(tk.Tk):
         self.score_text.config(text=self.game.score)
     
     def move(self, event):
+        arrow_keys = {'Up':'w', 'Left':'a', 'Down':'s', 'Right': 'd'}
         key = event.keysym
-        old_board = deepcopy(self.game.board)
+        if key in arrow_keys:
+            key = arrow_keys[key]
         if key in ['w', 'a', 's', 'd']:
+            temp_game = self.game.copy()
+            old_board = deepcopy(self.game.board)
             self.game.move(key)
             if self.game.board != old_board:
                 self.game.add_tile()
-            self.old_game = self.game.copy()
+                self.old_game = temp_game
+        elif key == 'u':
+            self.undo()
+        elif key == 'r':
+            self.restart()
         self.update_board()
         self.update_score()
     
+    def undo(self):
+        self.game = self.old_game
+
     def restart(self):
         del self.game
         self.game = Game()
+        self.old_game = self.old_game.copy()
 
 
 class Game:
