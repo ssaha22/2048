@@ -27,6 +27,9 @@ TILE_TEXT_COLORS = {2:"#776E65", 4:"#776E65", 8:"#F9F6F2", 16:"#F9F6F2",
                     512:"#F9F6F2", 1024:"#F9F6F2", 2048:"#F9F6F2"}
 TILE_FONT = ("Clear Sans", 30, "bold")
 
+GAME_OVER_TEXT_COLOR = "#776E65"
+GAME_OVER_FONT = ("Clear Sans", 50, "bold")
+
 
 class Window(tk.Tk):
     def __init__(self):
@@ -74,6 +77,8 @@ class Window(tk.Tk):
         self.create_board()
 
         self.bind("<Key>", self.move)
+
+        self.game_over_frame = tk.Frame(bg=WINDOW_BACKGROUND_COLOR, padx=100, pady=100)
 
         self.mainloop()
 
@@ -124,6 +129,10 @@ class Window(tk.Tk):
                 self.old_game = temp_game
         self.update_board()
         self.update_score()
+        if self.game.game_won():
+            self.game_over_frame.after(500, self.game_over, "won")
+        elif self.game.game_lost():
+            self.game_over_frame.after(500, self.game_over, "lost")
     
     def undo(self, event):
         self.game = self.old_game
@@ -136,7 +145,32 @@ class Window(tk.Tk):
         self.old_game = self.old_game.copy()
         self.update_board()
         self.update_score()
+    
+    def play_again(self, event):
+        self.game_over_frame.place(x=1000, y=1000)
+        self.bind("<Key>", self.move)
+        self.restart(event)
 
+    def quit(self, event):
+        self.destroy()
+    
+    def game_over(self, state):
+        #self.game_over_frame = tk.Frame(bg=WINDOW_BACKGROUND_COLOR, padx=100, pady=100)
+        if state == "won":
+            text = "Congratulations!\nYou won!"
+        elif state == "lost":
+            text = "Game over!\nYou lost!"
+        self.game_over_text = tk.Label(self.game_over_frame, text=text, fg=GAME_OVER_TEXT_COLOR, bg=WINDOW_BACKGROUND_COLOR, font=GAME_OVER_FONT)
+        self.game_over_text.grid(pady=10)
+        self.play_again_button = tk.Label(self.game_over_frame, text="PLAY AGAIN", fg=BUTTON_TEXT_COLOR, bg=BUTTON_BACKGROUND_COLOR, width=11, font=BUTTON_FONT, pady=10)
+        self.play_again_button.grid(pady=10)
+        self.play_again_button.bind("<Button-1>", self.play_again)
+        self.quit_button = tk.Label(self.game_over_frame, text="QUIT", fg=BUTTON_TEXT_COLOR, bg=BUTTON_BACKGROUND_COLOR, width=11, font=BUTTON_FONT, pady=10)
+        self.quit_button.grid(pady=10)
+        self.quit_button.bind("<Button-1>", self.quit)
+        self.game_over_frame.place(anchor="center", relx=0.5, rely=0.55)
+        self.unbind("<Key>")
+        
 
 class Game:
     def __init__(self):
